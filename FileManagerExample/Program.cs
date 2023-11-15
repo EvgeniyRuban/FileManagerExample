@@ -23,22 +23,24 @@ Console.Title = currentDirectory;
 do
 {
     var input = Console.ReadLine();
-    var command = CommandAnalizer.Analize(input);
+    var operation = OperationAnalizer.GetOperation(input);
 
-    if(command != null)
+    if(operation != null)
     {
-        Console.WriteLine($"CommandType: {command.CommandType}");
+        #region Print
+
+        Console.WriteLine($"CommandType: {operation.Command.Type}");
         Console.Write("Designations: ");
-        foreach(var item in command.Designations)
+        foreach(var item in operation.Command.Designations)
         {
             Console.Write($"{item} ");
         }
         Console.WriteLine();
 
-        if(command.Modifiers != null)
+        if(operation.Modifiers != null)
         {
             Console.Write("Modifiers: ");
-            foreach (var item in command.Modifiers)
+            foreach (var item in operation.Modifiers)
             {
                 Console.Write($"{item.Designation}[Required:{item.Required}] ");
             }
@@ -46,11 +48,12 @@ do
         }
 
         Console.Write("MaskComponents: ");
-        foreach (var item in command.MaskComponents)
+        foreach (var item in operation.MaskComponents)
         {
-            Console.Write($"{item} ");
+            Console.Write($"{item.ComponentType} ");
         }
         Console.WriteLine();
+        #endregion
     }
 
     Console.ReadKey();

@@ -1,6 +1,6 @@
-﻿namespace FileManagerExample.Models.Commands;
+﻿namespace FileManagerExample.Models.Operations;
 
-public struct CommandMaskDefinitions
+public struct OperationMaskDefinitions
 {
     public const string Command = "c";
     public const string Parameter = "p";
