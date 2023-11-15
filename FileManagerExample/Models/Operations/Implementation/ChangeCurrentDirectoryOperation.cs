@@ -9,7 +9,8 @@ public class ChangeCurrentDirectoryOperation : Operation
             designations: "cd"),
         parameters: new List<OperationParameter>
         {
-            new (required: true)
+            new OperationParameter(
+                required: true)
         },
         modifiers: null!,
         mask: "c p")

@@ -4,6 +4,7 @@ using FileManagerExample.Models.Configurations;
 #region Initialization
 
 string currentDirectory = string.Empty;
+var currentDirectoryPath = @"C:\Users\eugen\OneDrive\Рабочий стол"; // Временно, для тестирования.
 var config = Configuration.GetConfiguration();
 var startupSettings = await config.GetAsync<StartupSettings>();
 
@@ -23,7 +24,7 @@ Console.Title = currentDirectory;
 do
 {
     var input = Console.ReadLine();
-    var operation = OperationAnalizer.GetOperation(input);
+    var operation = OperationAnalizer.GetOperation(input, currentDirectoryPath);
 
     if(operation != null)
     {
