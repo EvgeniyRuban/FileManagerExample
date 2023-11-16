@@ -17,80 +17,52 @@ public static class OperationAnalizer
     public static Operation? GetOperation(string operationText, string currentDirectoryPath)
     {
         var array = operationText.Split(" ", StringSplitOptions.RemoveEmptyEntries);
-        CheckAbsolutePath(ref array);
-        CheckRelativePath(ref array, currentDirectoryPath);
-        return FindOperationByCommand(array);
+        CheckAndUnionAbsolutePath(ref array);
+        CheckAndUnionRelativePath(ref array, currentDirectoryPath);
+        var operation = FindOperationByCommand(array);
+        return operation;
     }
 
-    // Требуется рефакторинг!!! Подумать над названием
-    private static void CheckAbsolutePath(ref string[] array)
+    /// <summary>
+    /// The method checks for the presence of substrings of a compound absolute path in the refferenced <paramref name="array"/> and, if one is detected, combines it.
+    /// </summary>
+    private static void CheckAndUnionAbsolutePath(ref string[] array)
     {
         for (int i = 0; i < array.Length; i++)
         {
-            int pathElementCount = 0;
-            int startPathIndex = i;
-
-            // Если подстрока имеет корень пути.
             if (Path.IsPathRooted(array[i]))
             {
-                pathElementCount = 1;
-                var tempResult = array[i];
+                int pathElementCount = 1;
+                var possiblePath = new StringBuilder(array[i]);
 
-                // Проверяем ситуацию в которой путь может быть составной (из нескольких подстрок).
                 for (int j = i + 1; j < array.Length; j++)
                 {
-                    tempResult += $" {array[j]}";
-                    bool fileExists = File.Exists(tempResult);
-                    bool directoryExists = Directory.Exists(tempResult);
-                    File.Exists(tempResult);
-                    if (fileExists || directoryExists)
+                    possiblePath.Append(' ').Append(array[j]);
+
+                    if (File.Exists(possiblePath.ToString()) || Directory.Exists(possiblePath.ToString()))
                     {
                         pathElementCount = j - i + 1;
                     }
                 }
 
-                // Если путь составной, тогда производим склейку.
-                if (pathElementCount != 0)
+                if (pathElementCount > 1)
                 {
-                    int newArrayLength = array.Length - pathElementCount + 1;
-                    string[] newArray = new string[newArrayLength];
-                    var combinedPath = new StringBuilder();
-                    int lastPathIndex = startPathIndex + pathElementCount - 1;
-
-                    // Склеиваем найденный путь.
-                    for (int k = startPathIndex; k <= lastPathIndex; k++)
-                    {
-                        combinedPath.Append(array[k]);
-                        combinedPath.Append(" ");
-                    }
-
-                    // Создаем массив и переписываем в него данные из старого, с учетом новой размерности.
-                    for (int k = 0, x = 0; k < newArray.Length; k++, x++)
-                    {
-                        if (k == startPathIndex)
-                        {
-                            newArray[k] = combinedPath.ToString();
-                            x += pathElementCount - 1;
-                        }
-                        else
-                        {
-                            newArray[k] = array[x];
-                        }
-                    }
-
-                    array = newArray;
+                    UnionArrayPart(ref array, i, pathElementCount);
                 }
             }
         }
     }
 
-    // Требуется рефакторинг!!! Подумать над названием
-    private static void CheckRelativePath(ref string[] array, string currentDirectoryPath)
+    /// <summary>
+    /// The method checks for the presence of substrings of a compound relative path in the refferenced <paramref name="array"/> and, if one is detected, combines it.
+    /// </summary>
+    private static void CheckAndUnionRelativePath(ref string[] array, string currentDirectoryPath)
     {
         for (int i = 0; i < array.Length; i++)
         {
             int pathElementCount = 0;
-            var possiblePath = new StringBuilder(currentDirectoryPath + Path.DirectorySeparatorChar);
+            var possiblePath = new StringBuilder(currentDirectoryPath)
+                .Append(Path.DirectorySeparatorChar);
 
             for (int j = i; j < array.Length; j++)
             {
@@ -100,45 +72,18 @@ public static class OperationAnalizer
                 }
                 else
                 {
-                    possiblePath.Append(string.Concat(" ", array[j]));
+                    possiblePath.Append(' ').Append(array[j]);
                 }
 
-                // Проверяем, есть ли по полученому абсолутмому пути доступный файл или папка.
                 if (File.Exists(possiblePath.ToString()) || Directory.Exists(possiblePath.ToString()))
                 {
                     pathElementCount = j - i + 1;
                 }
             }
 
-            if (pathElementCount > 1) // Если отнасительный путь составной, склеиваем его.
+            if (pathElementCount > 1)
             {
-                var combinedPath = new StringBuilder();
-                int newArrayLength = array.Length - pathElementCount + 1;
-                var newArray = new string[newArrayLength];
-                int lastPathIndex = i + pathElementCount - 1;
-
-                // Склеиваем найденный путь.
-                for (int j = i; j <= lastPathIndex; j++)
-                {
-                    combinedPath.Append(array[j]);
-                    combinedPath.Append(" ");
-                }
-
-                // Создаем массив и переписываем в него данные из старого, с учетом новой размерности.
-                for (int j = 0, k = 0; j < newArray.Length; j++, k++)
-                {
-                    if (j == i)
-                    {
-                        newArray[j] = combinedPath.ToString();
-                        k += pathElementCount - 1;
-                    }
-                    else
-                    {
-                        newArray[j] = array[k];
-                    }
-                }
-
-                array = newArray;
+                UnionArrayPart(ref array, i, pathElementCount);
             }
         }
     }
@@ -196,5 +141,37 @@ public static class OperationAnalizer
             }
         }
         return componentCount;
+    }
+
+    /// <summary>
+    /// The method for union of the selected part of the <paramref name="array"/> starts with <paramref name="unionAreaStartIndex"/>.
+    /// </summary>
+    /// <exception cref="IndexOutOfRangeException"></exception>
+    private static void UnionArrayPart(ref string[] array, int unionAreaStartIndex, int unionAreaLength)
+    {
+        int newArrayLength = array.Length - unionAreaLength + 1;
+        var newArray = new string[newArrayLength];
+        var unionArea = new StringBuilder();
+        int unionAreaLastIndex = unionAreaStartIndex + unionAreaLength - 1;
+
+        for (int i = unionAreaStartIndex; i <= unionAreaLastIndex; i++)
+        {
+            unionArea.Append(array[i]).Append(' ');
+        }
+
+        for (int newArrayIterator = 0, oldArrayIterator = 0; newArrayIterator < newArray.Length; newArrayIterator++, oldArrayIterator++)
+        {
+            if (newArrayIterator == unionAreaStartIndex)
+            {
+                newArray[newArrayIterator] = unionArea.ToString();
+                oldArrayIterator += unionAreaLength - 1;
+            }
+            else
+            {
+                newArray[newArrayIterator] = array[oldArrayIterator];
+            }
+        }
+
+        array = newArray;
     }
 }
