@@ -1,6 +1,6 @@
 ﻿namespace FileManagerExample.Models.Operations;
 
-public class ListDirectoryContentOperation : Operation
+public sealed class ListDirectoryContentOperation : Operation
 {
     public ListDirectoryContentOperation() : base(
         type: OperationTypes.ListDirectoryContent,

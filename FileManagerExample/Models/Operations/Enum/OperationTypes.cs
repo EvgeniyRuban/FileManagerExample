@@ -5,8 +5,8 @@ public enum OperationTypes
     ChangeCurrentDirectory, // done
     MakeDirectory, // done
     ListDirectoryContent, // done
-    RenameDirectoryTitle,
-    DeleteDirectory,
+    RenameDirectoryTitle, // done
+    DeleteDirectory, 
     CreateFile,
     RenameFile,
     FillFile,

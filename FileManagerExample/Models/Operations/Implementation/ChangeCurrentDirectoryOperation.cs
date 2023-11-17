@@ -1,6 +1,6 @@
 ﻿namespace FileManagerExample.Models.Operations;
 
-public class ChangeCurrentDirectoryOperation : Operation
+public sealed class ChangeCurrentDirectoryOperation : Operation
 {
     public ChangeCurrentDirectoryOperation() : base(
         type: OperationTypes.ChangeCurrentDirectory,

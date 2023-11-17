@@ -10,6 +10,7 @@ public static class OperationAnalizer
         new ChangeCurrentDirectoryOperation(),
         new MakeDirectoryOperation(),
         new ListDirectoryContentOperation(),
+        new RenameDirectoryTitleOperation(),
     };
 
     public static OperationAnalysisInfo GetOperationAnalysis(string operationText, string currentDirectoryPath)
@@ -179,7 +180,15 @@ public static class OperationAnalizer
                 for (int j = i; j < array.Length; j++)
                 {
                     char lastCharacter = array[j][array[j].Length - 1];
-                    if (lastCharacter == OperationMaskDefinitions.EndParameterMarker)
+
+                    if (i == j)
+                    {
+                        if(lastCharacter == OperationMaskDefinitions.EndParameterMarker && array[j].Length != 1)
+                        {
+                            break;
+                        }
+                    }
+                    else if (lastCharacter == OperationMaskDefinitions.EndParameterMarker)
                     {
                         break;
                     }

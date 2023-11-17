@@ -1,6 +1,6 @@
 ﻿namespace FileManagerExample.Models.Operations;
 
-public class MakeDirectoryOperation : Operation
+public sealed class MakeDirectoryOperation : Operation
 {
     public MakeDirectoryOperation() : base(
         type: OperationTypes.MakeDirectory,
