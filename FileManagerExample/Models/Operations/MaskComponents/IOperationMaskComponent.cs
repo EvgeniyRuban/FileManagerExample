@@ -1,7 +1,5 @@
 ﻿namespace FileManagerExample.Models.Operations;
 
-public interface IOperationMaskComponent
+public interface IOperationMaskComponent : IOperationComponent
 {
-    OperationMaskComponent ComponentType { get; }
-    bool Required { get; }
 }

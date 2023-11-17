@@ -1,6 +1,6 @@
 ﻿namespace FileManagerExample.Models.Operations;
 
-public enum OperationMaskComponent
+public enum OperationComponents
 {
     Command,
     Parameter,

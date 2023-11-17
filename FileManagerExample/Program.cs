@@ -24,38 +24,29 @@ Console.Title = currentDirectory;
 do
 {
     var input = Console.ReadLine();
-    var operation = OperationAnalizer.GetOperation(input, currentDirectoryPath);
+    var operationAnalysis = OperationAnalizer.GetOperationAnalysis(input, currentDirectoryPath);
 
-    if(operation != null)
+    #region Print
+
+    Console.WriteLine($"Operation detected: {operationAnalysis.OperationDetected}");
+    Console.WriteLine($"Operation type: {operationAnalysis.OperationType}");
+
+    Console.WriteLine($"Parameters count: {operationAnalysis.Parameters.Count}");
+    for (int i = 0; i < operationAnalysis.Parameters.Count; i++)
     {
-        #region Print
-
-        Console.WriteLine($"CommandType: {operation.Command.Type}");
-        Console.Write("Designations: ");
-        foreach(var item in operation.Command.Designations)
-        {
-            Console.Write($"{item} ");
-        }
-        Console.WriteLine();
-
-        if(operation.Modifiers != null)
-        {
-            Console.Write("Modifiers: ");
-            foreach (var item in operation.Modifiers)
-            {
-                Console.Write($"{item.Designation}[Required:{item.Required}] ");
-            }
-            Console.WriteLine();
-        }
-
-        Console.Write("MaskComponents: ");
-        foreach (var item in operation.MaskComponents)
-        {
-            Console.Write($"{item.ComponentType} ");
-        }
-        Console.WriteLine();
-        #endregion
+        Console.WriteLine($"Parameter-{i + 1}:\n\tType: {operationAnalysis.Parameters[i].Type}\n\tValue: {operationAnalysis.Parameters[i].Value}");
     }
+
+    Console.WriteLine($"Modifiers count: {operationAnalysis.Modifiers.Count}");
+    for (int i = 0; i < operationAnalysis.Modifiers.Count; i++)
+    {
+        Console.WriteLine($"Modifier-{i + 1}:\n\tAssignment: {operationAnalysis.Modifiers[i].Assignment}");
+    }
+
+    Console.WriteLine($"Succes: {operationAnalysis.Success}");
+    Console.WriteLine($"Error info: {operationAnalysis.ErrorInfo}");
+
+    #endregion
 
     Console.ReadKey();
     Console.Clear();

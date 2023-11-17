@@ -4,11 +4,13 @@ public class OperationParameter : IOperationMaskComponent
 {
     private bool _required;
 
-    public OperationParameter(bool required)
+    public OperationParameter(OperationParameterTypes type, bool required)
     {
+        Type = type;
         _required = required;
     }
 
-    public OperationMaskComponent ComponentType => OperationMaskComponent.Parameter;
+    public OperationParameterTypes Type { get; }
+    public OperationComponents ComponentType => OperationComponents.Parameter;
     public bool Required => _required;
 }

@@ -1,6 +1,6 @@
 ﻿namespace FileManagerExample.Models.Operations;
 
-public enum OperationType
+public enum OperationTypes
 {
     ChangeCurrentDirectory, // done
     MakeDirectory, // done
@@ -14,4 +14,5 @@ public enum OperationType
     ClearFile,
     DeleteFile,
     OpenFile,
+    None
 }

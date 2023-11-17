@@ -12,78 +12,190 @@ public static class OperationAnalizer
         new ListDirectoryContentOperation(),
     };
 
-    // Подумать над названием.
-    // Нужно возвращать модель с полным отчетом о попытке проанализировать строку.
-    public static Operation? GetOperation(string operationText, string currentDirectoryPath)
+    public static OperationAnalysisInfo GetOperationAnalysis(string operationText, string currentDirectoryPath)
     {
-        var array = operationText.Split(" ", StringSplitOptions.RemoveEmptyEntries);
-        CheckAndUnionAbsolutePath(ref array);
-        CheckAndUnionRelativePath(ref array, currentDirectoryPath);
+        var operationAnalysisInfo = new OperationAnalysisInfo();
+        var array = operationText.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+        JoinParameters(ref array);
+
         var operation = FindOperationByCommand(array);
-        return operation;
+
+        if (operation is null)
+        {
+            operationAnalysisInfo.ErrorInfo = OperationAnalysisErrorDescriptions.OperationUndefined;
+            return operationAnalysisInfo;
+        }
+
+        operationAnalysisInfo.OperationDetected = true;
+        operationAnalysisInfo.OperationType = operation.Type;
+
+        if (!CheckByRequiredMaskComponentCount(operation, array.Length))
+        {
+            operationAnalysisInfo.ErrorInfo = OperationAnalysisErrorDescriptions.IncorrectMaskComponentCount;
+            return operationAnalysisInfo;
+        }
+
+        var interpretedComponents = MatchMask(operation, array);
+
+        if (interpretedComponents is null)
+        {
+            operationAnalysisInfo.ErrorInfo = OperationAnalysisErrorDescriptions.MaskMatchFailed;
+            return operationAnalysisInfo;
+        }
+
+        foreach ( var component in interpretedComponents)
+        {
+            switch (component.ComponentType)
+            {
+                case OperationComponents.Parameter: operationAnalysisInfo.Parameters.Add((OperationParameterInfo)component); break;
+                case OperationComponents.Modifier: operationAnalysisInfo.Modifiers.Add((OperationModifierInfo)component); break;
+            }
+        }
+        operationAnalysisInfo.Success = true;
+
+        return operationAnalysisInfo;
     }
 
-    /// <summary>
-    /// The method checks for the presence of substrings of a compound absolute path in the refferenced <paramref name="array"/> and, if one is detected, combines it.
-    /// </summary>
-    private static void CheckAndUnionAbsolutePath(ref string[] array)
+    private static ICollection<IOperationComponentInfo>? MatchMask(Operation operation, string[] array)
     {
+        var interpretedComponents = new IOperationComponentInfo[array.Length];
+        var mask = operation.MaskComponents;
+
+        // Производим интерпритацию полученных компонентов из массива array в компоненты маски.
         for (int i = 0; i < array.Length; i++)
         {
-            if (Path.IsPathRooted(array[i]))
+            if (IsCommand(array[i], operation.Command))
             {
-                int pathElementCount = 1;
-                var possiblePath = new StringBuilder(array[i]);
-
-                for (int j = i + 1; j < array.Length; j++)
+                interpretedComponents[i] = new OperationCommandInfo();
+            }
+            else if (IsParameter(array[i]))
+            {
+                interpretedComponents[i] = new OperationParameterInfo();
+            }
+            else
+            {
+                foreach (var modifier in operation.Modifiers)
                 {
-                    possiblePath.Append(' ').Append(array[j]);
-
-                    if (File.Exists(possiblePath.ToString()) || Directory.Exists(possiblePath.ToString()))
+                    if (IsModifier(array[i], modifier))
                     {
-                        pathElementCount = j - i + 1;
+                        interpretedComponents[i] = new OperationModifierInfo(modifier.Assignment, modifier.Required);
+                        break;
                     }
-                }
-
-                if (pathElementCount > 1)
-                {
-                    UnionArrayPart(ref array, i, pathElementCount);
                 }
             }
         }
+
+        // Проверка на наличие компонентов которые остались неопределенными.
+        if (interpretedComponents.Contains(null))
+        {
+            return null!;
+        }
+
+        // Проверка на наличие дубликатов модофикаторов.
+        foreach (var modifier in operation.Modifiers)
+        {
+            if (HasModifierDuplicates(interpretedComponents, modifier))
+            {
+                return null!;
+            }
+        }
+
+        // Проверка на наличие дубликатов команды.
+        if (HasCommandDuplicates(interpretedComponents,  operation.Command))
+        {
+            return null!;
+        }
+
+        // Сопоставление компонентов маски операции с полученным набором компонентов прошедших интерпритацию.
+        for (int i = 0, j = 0; i < mask.Count; i++)
+        {
+            bool bothComponentSameType = mask[i].ComponentType == interpretedComponents[j].ComponentType;
+            if (bothComponentSameType)
+            {
+                if (mask[i].ComponentType == OperationComponents.Parameter)
+                {
+                    var parameter = mask[i] as OperationParameter;
+                    interpretedComponents[j] = new OperationParameterInfo(required: parameter.Required)
+                    {
+                        Type = parameter.Type,
+                        Value = array[j]
+                    };
+                }
+                else if (mask[i].ComponentType == OperationComponents.Modifier)
+                {
+                    var maskModifier = mask[i] as OperationModifier;
+                    var interpretedModifier = interpretedComponents[j] as OperationModifierInfo;
+                    var bothModifierSameAssignment = maskModifier.Assignment == interpretedModifier.Assignment;
+
+                    if (!bothModifierSameAssignment)
+                    {
+                        continue;
+                    }
+                }
+                j++;
+            }
+
+            if (i == mask.Count - 1 && j != interpretedComponents.Length)
+            {
+                return null!;
+            }
+        }
+
+        return interpretedComponents;
     }
 
+    private static bool HasCommandDuplicates(IEnumerable<IOperationComponentInfo> components, OperationCommand command) 
+        => components.Count(c => c.ComponentType == OperationComponents.Command) > 1;
+
+    private static bool HasModifierDuplicates(IEnumerable<IOperationComponentInfo> components, OperationModifier modifier)
+    {
+        int modifierCount = components
+            .Where(c => c.ComponentType == OperationComponents.Modifier)
+            .Count(m => ((OperationModifier)m).Assignment == modifier.Assignment);
+
+        return modifierCount > 1;
+    }
+
+    private static bool IsCommand(string text, OperationCommand command) => command.Designations.Contains(text);
+
+    private static bool IsParameter(string text)
+        => text[0] == OperationMaskDefinitions.StartParameterMarker && text[text.Length - 1] == OperationMaskDefinitions.EndParameterMarker;
+
+    private static bool IsModifier(string text, OperationModifier modifier) => modifier.Designation == text;
+
     /// <summary>
-    /// The method checks for the presence of substrings of a compound relative path in the refferenced <paramref name="array"/> and, if one is detected, combines it.
+    /// The method checks for the presence of a parameter by searching for markers of the beginning and end of the parameter; if the parameter is compound, it is joined.
     /// </summary>
-    private static void CheckAndUnionRelativePath(ref string[] array, string currentDirectoryPath)
+    private static void JoinParameters(ref string[] array)
     {
         for (int i = 0; i < array.Length; i++)
         {
-            int pathElementCount = 0;
-            var possiblePath = new StringBuilder(currentDirectoryPath)
-                .Append(Path.DirectorySeparatorChar);
-
-            for (int j = i; j < array.Length; j++)
+            char firstCharacter = array[i][0];
+            if (firstCharacter == OperationMaskDefinitions.StartParameterMarker)
             {
-                if (j == i)
+                int parameterElementCount = 1;
+
+                for (int j = i; j < array.Length; j++)
                 {
-                    possiblePath.Append(array[j]);
-                }
-                else
-                {
-                    possiblePath.Append(' ').Append(array[j]);
+                    char lastCharacter = array[j][array[j].Length - 1];
+                    if (lastCharacter == OperationMaskDefinitions.EndParameterMarker)
+                    {
+                        break;
+                    }
+
+                    if (j == array.Length - 1)
+                    {
+                        parameterElementCount = -1;
+                    }
+
+                    parameterElementCount++;
                 }
 
-                if (File.Exists(possiblePath.ToString()) || Directory.Exists(possiblePath.ToString()))
+                if (parameterElementCount > 1)
                 {
-                    pathElementCount = j - i + 1;
+                    Join(ref array, i, parameterElementCount, " ");
                 }
-            }
-
-            if (pathElementCount > 1)
-            {
-                UnionArrayPart(ref array, i, pathElementCount);
             }
         }
     }
@@ -92,14 +204,14 @@ public static class OperationAnalizer
     {
         foreach (var operation in _operations)
         {
-            (int MinIndex, int MaxIndex) commandPossibleRange = GetPossibleCommandRange(operation);
+            (int MinIndex, int MaxIndex) commandRange = operation.GetCommandPositionRangeInMask();
 
-            if (array.Length <= commandPossibleRange.MinIndex)
+            if (array.Length <= commandRange.MinIndex)
             {
                 continue;
             }
 
-            for (int i = commandPossibleRange.MinIndex; i <= commandPossibleRange.MaxIndex; i++)
+            for (int i = commandRange.MinIndex; i <= commandRange.MaxIndex; i++)
             {
                 if (operation.Command.Designations.Any(d => d == array[i]))
                 {
@@ -111,43 +223,18 @@ public static class OperationAnalizer
         return null;
     }
 
-    /// <summary>
-    /// The possible range of a command in a mask is the range between the minimum command index in the absence 
-    /// of all optional components (before the command) and the maximum, which is the totality of all components (before the command).
-    /// The method calculate and returns this range.
-    /// </summary>
-    private static (int MinIndex, int MaxIndex) GetPossibleCommandRange(Operation operation)
+    private static bool CheckByRequiredMaskComponentCount(Operation operation, int receivedComponentCount)
     {
-        int maxIndex = IndexOfCommand(operation);
-        int requiredComponentCountBeforeCommand = GetComponentCountByRequiredFlagValue(operation, true, maxIndex);
-        return (requiredComponentCountBeforeCommand, maxIndex);
-    }
-
-    private static int IndexOfCommand(Operation operation) => operation.MaskComponents.IndexOf(operation.Command);
-
-    /// <summary>
-    /// The method counts the number of mask components whose Required property value is 
-    /// <paramref name="requiredFlagValue"/> up to the specified <paramref name="lastIndex"/>.
-    /// </summary>
-    private static int GetComponentCountByRequiredFlagValue(Operation operation, bool requiredFlagValue, int lastIndex)
-    {
-        int componentCount = 0;
-
-        for (int i = 0; i < lastIndex; i++)
-        {
-            if (operation.MaskComponents[i].Required)
-            {
-                componentCount++;
-            }
-        }
-        return componentCount;
+        var requiredComponentCount = operation.MaskComponents.Count(c => c.Required);
+        return receivedComponentCount >= requiredComponentCount && receivedComponentCount <= operation.MaskComponents.Count;
     }
 
     /// <summary>
     /// The method for union of the selected part of the <paramref name="array"/> starts with <paramref name="unionAreaStartIndex"/>.
+    /// The <paramref name="joinString"/> is applied between all array components being joined
     /// </summary>
     /// <exception cref="IndexOutOfRangeException"></exception>
-    private static void UnionArrayPart(ref string[] array, int unionAreaStartIndex, int unionAreaLength)
+    private static void Join(ref string[] array, int unionAreaStartIndex, int unionAreaLength, string joinString = "")
     {
         int newArrayLength = array.Length - unionAreaLength + 1;
         var newArray = new string[newArrayLength];
@@ -156,7 +243,14 @@ public static class OperationAnalizer
 
         for (int i = unionAreaStartIndex; i <= unionAreaLastIndex; i++)
         {
-            unionArea.Append(array[i]).Append(' ');
+            if (i == unionAreaLastIndex)
+            {
+                unionArea.Append(array[i]);
+            }
+            else
+            {
+                unionArea.Append(array[i]).Append(joinString);
+            }
         }
 
         for (int newArrayIterator = 0, oldArrayIterator = 0; newArrayIterator < newArray.Length; newArrayIterator++, oldArrayIterator++)

@@ -5,12 +5,14 @@ public class OperationModifier : IOperationMaskComponent
     public readonly string? Designation;
     private readonly bool _required;
 
-    public OperationModifier(bool required, string designation)
+    public OperationModifier(OperationModifierAssignments assignment, bool required, string designation)
     {
+        Assignment = assignment;
         _required = required;
         Designation = designation;
     }
 
-    public OperationMaskComponent ComponentType => OperationMaskComponent.Modifier;
+    public OperationModifierAssignments Assignment { get; }
+    public OperationComponents ComponentType => OperationComponents.Modifier;
     public bool Required => _required;
 }

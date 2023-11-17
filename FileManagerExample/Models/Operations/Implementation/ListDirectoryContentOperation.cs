@@ -3,14 +3,14 @@
 public class ListDirectoryContentOperation : Operation
 {
     public ListDirectoryContentOperation() : base(
+        type: OperationTypes.ListDirectoryContent,
         command: new OperationCommand(
-            commandType: OperationType.ListDirectoryContent,
-            required: true,
             designations: "ls"),
         parameters: null!,
-        modifiers: new List<OperationModifier>
+        modifiers: new List<OperationModifier>()
         {
             new OperationModifier(
+                assignment: OperationModifierAssignments.ListIncludeHiddenFiles,
                 required: false,
                 designation: "-a")
         },
