@@ -4,9 +4,9 @@ public sealed class RemoveFileOrDirectoryOperation : Operation
 {
     public RemoveFileOrDirectoryOperation() : base(
         type: OperationTypes.RemoveFileOrDirectory,
-        new OperationCommand(
+        command: new OperationCommand(
             declarations: "rm"),
-        new List<OperationParameter>
+        parameters: new List<OperationParameter>
         {
             new OperationParameter(
                 type: OperationParameterTypes.FreeForm,

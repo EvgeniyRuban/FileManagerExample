@@ -4,7 +4,7 @@ public sealed class CreateMultipleFilesOperation : Operation
 {
     public CreateMultipleFilesOperation() : base(
         type: OperationTypes.CreateMultipleFiles,
-        new OperationCommand(
+        command: new OperationCommand(
             declarations: "touch"),
         parameters: new List<OperationParameter>
         {
