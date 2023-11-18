@@ -1,18 +1,18 @@
 ﻿namespace FileManagerExample.Models.Operations;
 
-public sealed class RenameFileOrDirectoryTitleOperation : Operation
+public sealed class CopyFileOrDirectoryOperation : Operation
 {
-    public RenameFileOrDirectoryTitleOperation() : base(
-        type: OperationTypes.RenameFileOrDirectoryTitle,
+    public CopyFileOrDirectoryOperation() : base(
+        type: OperationTypes.CopyFileOrDirectory,
         command: new OperationCommand(
-            declarations: "mv"),
+            declarations: "cp"),
         parameters: new List<OperationParameter>
         {
             new OperationParameter(
-                type: OperationParameterTypes.FreeForm,
+                type: OperationParameterTypes.Path,
                 required: true),
             new OperationParameter(
-                type: OperationParameterTypes.FreeForm,
+                type: OperationParameterTypes.Path,
                 required: true)
         },
         modifiers: null!,

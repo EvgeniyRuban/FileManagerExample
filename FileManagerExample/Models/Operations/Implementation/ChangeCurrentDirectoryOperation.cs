@@ -5,7 +5,7 @@ public sealed class ChangeCurrentDirectoryOperation : Operation
     public ChangeCurrentDirectoryOperation() : base(
         type: OperationTypes.ChangeCurrentDirectory,
         command: new OperationCommand(
-            designations: "cd"),
+            declarations: "cd"),
         parameters: new List<OperationParameter>
         {
             new OperationParameter(

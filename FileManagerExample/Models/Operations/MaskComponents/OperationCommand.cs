@@ -2,12 +2,12 @@
 
 public class OperationCommand : IOperationMaskComponent
 {
-    public OperationCommand(params string[] designations)
+    public OperationCommand(params string[] declarations)
     {
-        Designations = designations;
+        Declarations = declarations;
     }
 
-    public IList<string> Designations { get; init; }
+    public IList<string> Declarations { get; init; }
     public OperationComponents ComponentType => OperationComponents.Command;
     public bool Required => true;
 }

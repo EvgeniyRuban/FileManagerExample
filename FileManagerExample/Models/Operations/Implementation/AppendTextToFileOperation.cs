@@ -1,19 +1,20 @@
 ﻿namespace FileManagerExample.Models.Operations;
 
-public sealed class MakeDirectoryOperation : Operation
+public sealed class AppendTextToFileOperation : Operation
 {
-    public MakeDirectoryOperation() : base(
-        type: OperationTypes.MakeDirectory,
+    public AppendTextToFileOperation() : base (
+        type: OperationTypes.AppendTextToFile,
         command: new OperationCommand(
-            declarations: "mkdir"),
+            declarations: "echo"),
         parameters: new List<OperationParameter>
         {
             new OperationParameter(
                 type: OperationParameterTypes.FreeForm,
-                required: true)
+                required: true),
         },
         modifiers: null!,
         mask: "c p")
     {
+        
     }
 }

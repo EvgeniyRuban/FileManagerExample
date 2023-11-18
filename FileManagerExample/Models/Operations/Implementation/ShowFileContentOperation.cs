@@ -1,19 +1,20 @@
 ﻿namespace FileManagerExample.Models.Operations;
 
-public sealed class MakeDirectoryOperation : Operation
+public sealed class ShowFileContentOperation : Operation
 {
-    public MakeDirectoryOperation() : base(
-        type: OperationTypes.MakeDirectory,
+    public ShowFileContentOperation() : base (
+        type: OperationTypes.ShowFileContent,
         command: new OperationCommand(
-            declarations: "mkdir"),
+            declarations: "cat"),
         parameters: new List<OperationParameter>
         {
             new OperationParameter(
                 type: OperationParameterTypes.FreeForm,
-                required: true)
+                required: true),
         },
         modifiers: null!,
         mask: "c p")
     {
+        
     }
 }

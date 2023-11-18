@@ -10,7 +10,12 @@ public static class OperationAnalizer
         new ChangeCurrentDirectoryOperation(),
         new MakeDirectoryOperation(),
         new ListDirectoryContentOperation(),
-        new RenameDirectoryTitleOperation(),
+        new RenameFileOrDirectoryTitleOperation(),
+        new RemoveFileOrDirectoryOperation(),
+        new CreateMultipleFilesOperation(),
+        new ShowFileContentOperation(),
+        new AppendTextToFileOperation(),
+        new CopyFileOrDirectoryOperation()
     };
 
     public static OperationAnalysisInfo GetOperationAnalysis(string operationText, string currentDirectoryPath)
@@ -137,6 +142,11 @@ public static class OperationAnalizer
                 j++;
             }
 
+            if (j == interpretedComponents.Length)
+            {
+                break;
+            }
+
             if (i == mask.Count - 1 && j != interpretedComponents.Length)
             {
                 return null!;
@@ -153,17 +163,17 @@ public static class OperationAnalizer
     {
         int modifierCount = components
             .Where(c => c.ComponentType == OperationComponents.Modifier)
-            .Count(m => ((OperationModifier)m).Assignment == modifier.Assignment);
+            .Count(m => ((OperationModifierInfo)m).Assignment == modifier.Assignment);
 
         return modifierCount > 1;
     }
 
-    private static bool IsCommand(string text, OperationCommand command) => command.Designations.Contains(text);
+    private static bool IsCommand(string text, OperationCommand command) => command.Declarations.Contains(text);
 
     private static bool IsParameter(string text)
         => text[0] == OperationMaskDefinitions.StartParameterMarker && text[text.Length - 1] == OperationMaskDefinitions.EndParameterMarker;
 
-    private static bool IsModifier(string text, OperationModifier modifier) => modifier.Designation == text;
+    private static bool IsModifier(string text, OperationModifier modifier) => modifier.Declaration == text;
 
     /// <summary>
     /// The method checks for the presence of a parameter by searching for markers of the beginning and end of the parameter; if the parameter is compound, it is joined.
@@ -222,7 +232,7 @@ public static class OperationAnalizer
 
             for (int i = commandRange.MinIndex; i <= commandRange.MaxIndex; i++)
             {
-                if (operation.Command.Designations.Any(d => d == array[i]))
+                if (operation.Command.Declarations.Any(d => d == array[i]))
                 {
                     return operation;
                 }

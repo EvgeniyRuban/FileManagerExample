@@ -2,17 +2,14 @@
 
 public enum OperationTypes
 {
-    ChangeCurrentDirectory, // done
-    MakeDirectory, // done
-    ListDirectoryContent, // done
-    RenameDirectoryTitle, // done
-    DeleteDirectory, 
-    CreateFile,
-    RenameFile,
-    FillFile,
-    AppendFile,
-    ClearFile,
-    DeleteFile,
-    OpenFile,
+    ChangeCurrentDirectory,
+    MakeDirectory,
+    ListDirectoryContent,
+    RenameFileOrDirectoryTitle,
+    RemoveFileOrDirectory,
+    CreateMultipleFiles,
+    ShowFileContent,
+    AppendTextToFile,
+    CopyFileOrDirectory,
     None
 }

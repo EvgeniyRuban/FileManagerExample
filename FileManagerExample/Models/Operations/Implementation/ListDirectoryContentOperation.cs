@@ -5,14 +5,14 @@ public sealed class ListDirectoryContentOperation : Operation
     public ListDirectoryContentOperation() : base(
         type: OperationTypes.ListDirectoryContent,
         command: new OperationCommand(
-            designations: "ls"),
+            declarations: "ls"),
         parameters: null!,
         modifiers: new List<OperationModifier>()
         {
             new OperationModifier(
-                assignment: OperationModifierAssignments.ListIncludeHiddenFiles,
+                assignment: OperationModifierAssignments.All,
                 required: false,
-                designation: "-a")
+                declaration: "-a")
         },
         mask: "c m")
     {

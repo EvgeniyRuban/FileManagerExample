@@ -2,14 +2,14 @@
 
 public class OperationModifier : IOperationMaskComponent
 {
-    public readonly string? Designation;
+    public readonly string? Declaration;
     private readonly bool _required;
 
-    public OperationModifier(OperationModifierAssignments assignment, bool required, string designation)
+    public OperationModifier(OperationModifierAssignments assignment, bool required, string declaration)
     {
         Assignment = assignment;
         _required = required;
-        Designation = designation;
+        Declaration = declaration;
     }
 
     public OperationModifierAssignments Assignment { get; }
