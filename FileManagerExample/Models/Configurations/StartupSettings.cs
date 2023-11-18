@@ -1,6 +1,4 @@
-﻿using FileManagerExample.Intarfaces;
-
-namespace FileManagerExample.Models.Configurations;
+﻿namespace FileManagerExample.Models.Configurations;
 
 public class StartupSettings : IConfigurationObject
 {
