@@ -1,6 +1,6 @@
 ﻿namespace FileManagerExample.Models.Operations;
 
-public class OperationAnalysisInfo
+public class OperationInfo
 {
     public OperationTypes OperationType { get; set; } = OperationTypes.None;
     public IList<OperationParameterInfo> Parameters { get; set; } = new List<OperationParameterInfo>();

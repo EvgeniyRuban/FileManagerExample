@@ -15,12 +15,13 @@ public static class OperationAnalizer
         new CreateMultipleFilesOperation(),
         new ShowFileContentOperation(),
         new AppendTextToFileOperation(),
-        new CopyFileOrDirectoryOperation()
+        new CopyFileOrDirectoryOperation(),
+        new ClearConsoleOperation(),
     };
 
-    public static OperationAnalysisInfo GetOperationAnalysis(string operationText, string currentDirectoryPath)
+    public static OperationInfo GetOperationAnalysis(string operationText, string currentDirectoryPath)
     {
-        var operationAnalysisInfo = new OperationAnalysisInfo();
+        var operationAnalysisInfo = new OperationInfo();
         var array = operationText.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
         JoinParameters(ref array);
