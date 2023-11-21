@@ -4,27 +4,21 @@ using FileManagerExample.Models.Operations;
 
 #region Initialization
 
-string currentDirectory = string.Empty;
 string userName = Environment.UserName;
-var currentDirectoryPath = @"C:\Users\eugen\OneDrive\Рабочий стол"; // Временно, для тестирования.
+var currentDirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
 var config = Configuration.GetConfiguration();
 var startupSettings = await config.GetAsync<StartupSettings>();
 
 if (startupSettings.UseDirectoryFromLastSession)
 {
-    currentDirectory = startupSettings.LastDirectoryPath;
+    currentDirectoryPath = startupSettings.LastDirectoryPath;
 }
-else
-{
-    currentDirectory = Directory.GetDirectoryRoot(Environment.CurrentDirectory);
-}
-
-Console.Title = currentDirectory;
 
 #endregion
 
 do
 {
+    UpdateConsoleTitle(currentDirectoryPath);
     Console.Write($"{userName}: ");
     var input = Console.ReadLine();
     var operationInfo = OperationAnalizer.GetOperationAnalysis(input, currentDirectoryPath);
@@ -41,7 +35,12 @@ do
         continue;
     }
 
-    Print(operationInfo);
+    var fileManagerInfo = FileManager.ExecuteOperation(operationInfo, ref currentDirectoryPath);
+
+    if (!fileManagerInfo.Succes)
+    {
+        Console.WriteLine(fileManagerInfo.Error);
+    }
 }
 while(true);
 
@@ -65,3 +64,4 @@ void Print(OperationInfo operationInfo)
     Console.WriteLine($"Succes: {operationInfo.Success}");
     Console.WriteLine($"Error info: {operationInfo.ErrorInfo}");
 }
+void UpdateConsoleTitle(string title) => Console.Title = title;

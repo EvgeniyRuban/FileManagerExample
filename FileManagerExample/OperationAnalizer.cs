@@ -55,7 +55,14 @@ public static class OperationAnalizer
         {
             switch (component.ComponentType)
             {
-                case OperationComponents.Parameter: operationAnalysisInfo.Parameters.Add((OperationParameterInfo)component); break;
+                case OperationComponents.Parameter:
+                    {
+                        var parameterInfo = component as OperationParameterInfo;
+                        var temp = parameterInfo.Value.TrimStart(OperationMaskDefinitions.StartParameterMarker);
+                        parameterInfo.Value = temp.TrimEnd(OperationMaskDefinitions.EndParameterMarker);
+                        operationAnalysisInfo.Parameters.Add(parameterInfo);
+                        break;
+                    }
                 case OperationComponents.Modifier: operationAnalysisInfo.Modifiers.Add((OperationModifierInfo)component); break;
             }
         }

@@ -6,7 +6,7 @@ public static class OperationExamples
     {
         { OperationTypes.ChangeCurrentDirectory, "cd \"destination_directory\" - to change current directory" },
         { OperationTypes.MakeDirectory, "mkdir \"directory_name\" - to create new directory" },
-        { OperationTypes.ListDirectoryContent, "ls - list directory content\nls -a - to list directory content include hidden files" },
+        { OperationTypes.ListDirectoryContent, "ls - list directory content" },
         { OperationTypes.RenameFileOrDirectoryTitle, "mv \"source_file_name\" \"dest_file_name\" - to rename file" +
             "\nmv \"source_directory_name\" \"dest_directory_name\" - to rename directory" },
         { OperationTypes.RemoveFileOrDirectory, "rm \"file_name\" - to remove file\nrm -r \"directory_name\" - to remove directory" },

@@ -7,14 +7,8 @@ public sealed class ListDirectoryContentOperation : Operation
         command: new OperationCommand(
             declarations: "ls"),
         parameters: null!,
-        modifiers: new List<OperationModifier>()
-        {
-            new OperationModifier(
-                assignment: OperationModifierAssignments.All,
-                required: false,
-                declaration: "-a")
-        },
-        mask: "c m")
+        modifiers: null!,
+        mask: "c")
     {
     }
 }

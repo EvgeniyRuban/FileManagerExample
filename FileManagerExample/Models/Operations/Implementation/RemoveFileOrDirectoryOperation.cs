@@ -21,6 +21,5 @@ public sealed class RemoveFileOrDirectoryOperation : Operation
         },
         mask: "c m p")
     {
-
     }
 }
