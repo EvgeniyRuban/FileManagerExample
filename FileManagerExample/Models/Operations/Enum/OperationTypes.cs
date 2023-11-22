@@ -11,5 +11,6 @@ public enum OperationTypes
     ShowFileContent,
     AppendTextToFile,
     CopyFileOrDirectory,
+    ClearConsole,
     None
 }

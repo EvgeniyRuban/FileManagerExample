@@ -13,10 +13,20 @@ public sealed class CopyFileOrDirectoryOperation : Operation
                 required: true),
             new OperationParameter(
                 type: OperationParameterTypes.Path,
-                required: true)
+                required: false)
         },
-        modifiers: null!,
-        mask: "c p p")
+        modifiers: new List<OperationModifier>
+        {
+            new OperationModifier(
+                assignment: OperationModifierAssignments.Overwrite,
+                required: false,
+                declaration: "-o"),
+            new OperationModifier(
+                assignment: OperationModifierAssignments.Recursive,
+                required: false,
+                declaration: "-r")
+        },
+        mask: "c m m p p")
     {
     }
 }

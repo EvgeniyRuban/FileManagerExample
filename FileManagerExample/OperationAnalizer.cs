@@ -15,12 +15,13 @@ public static class OperationAnalizer
         new CreateMultipleFilesOperation(),
         new ShowFileContentOperation(),
         new AppendTextToFileOperation(),
-        new CopyFileOrDirectoryOperation()
+        new CopyFileOrDirectoryOperation(),
+        new ClearConsoleOperation(),
     };
 
-    public static OperationAnalysisInfo GetOperationAnalysis(string operationText, string currentDirectoryPath)
+    public static OperationInfo GetOperationAnalysis(string operationText, string currentDirectoryPath)
     {
-        var operationAnalysisInfo = new OperationAnalysisInfo();
+        var operationAnalysisInfo = new OperationInfo();
         var array = operationText.Split(' ', StringSplitOptions.RemoveEmptyEntries);
 
         JoinParameters(ref array);
@@ -54,7 +55,14 @@ public static class OperationAnalizer
         {
             switch (component.ComponentType)
             {
-                case OperationComponents.Parameter: operationAnalysisInfo.Parameters.Add((OperationParameterInfo)component); break;
+                case OperationComponents.Parameter:
+                    {
+                        var parameterInfo = component as OperationParameterInfo;
+                        var temp = parameterInfo.Value.TrimStart(OperationMaskDefinitions.StartParameterMarker);
+                        parameterInfo.Value = temp.TrimEnd(OperationMaskDefinitions.EndParameterMarker);
+                        operationAnalysisInfo.Parameters.Add(parameterInfo);
+                        break;
+                    }
                 case OperationComponents.Modifier: operationAnalysisInfo.Modifiers.Add((OperationModifierInfo)component); break;
             }
         }

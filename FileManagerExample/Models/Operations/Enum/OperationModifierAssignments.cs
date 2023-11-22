@@ -2,6 +2,6 @@
 
 public enum OperationModifierAssignments
 {
-    All,
     Recursive,
+    Overwrite
 }

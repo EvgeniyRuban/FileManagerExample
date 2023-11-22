@@ -9,12 +9,14 @@ public sealed class AppendTextToFileOperation : Operation
         parameters: new List<OperationParameter>
         {
             new OperationParameter(
+                type: OperationParameterTypes.Path,
+                required: true),
+            new OperationParameter(
                 type: OperationParameterTypes.FreeForm,
                 required: true),
         },
         modifiers: null!,
-        mask: "c p")
+        mask: "c p p")
     {
-        
     }
 }

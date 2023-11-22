@@ -1,54 +1,67 @@
 ﻿using FileManagerExample;
 using FileManagerExample.Models.Configurations;
+using FileManagerExample.Models.Operations;
 
 #region Initialization
 
-string currentDirectory = string.Empty;
-var currentDirectoryPath = @"C:\Users\eugen\OneDrive\Рабочий стол"; // Временно, для тестирования.
+string userName = Environment.UserName;
+var currentDirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
 var config = Configuration.GetConfiguration();
 var startupSettings = await config.GetAsync<StartupSettings>();
 
 if (startupSettings.UseDirectoryFromLastSession)
 {
-    currentDirectory = startupSettings.LastDirectoryPath;
+    currentDirectoryPath = startupSettings.LastDirectoryPath;
 }
-else
-{
-    currentDirectory = Directory.GetDirectoryRoot(Environment.CurrentDirectory);
-}
-
-Console.Title = currentDirectory;
 
 #endregion
 
 do
 {
+    UpdateConsoleTitle(currentDirectoryPath);
+    Console.Write($"{userName}: ");
     var input = Console.ReadLine();
-    var operationAnalysis = OperationAnalizer.GetOperationAnalysis(input, currentDirectoryPath);
+    var operationInfo = OperationAnalizer.GetOperationAnalysis(input, currentDirectoryPath);
 
-    #region Print
-
-    Console.WriteLine($"Operation detected: {operationAnalysis.OperationDetected}");
-    Console.WriteLine($"Operation type: {operationAnalysis.OperationType}");
-
-    Console.WriteLine($"Parameters count: {operationAnalysis.Parameters.Count}");
-    for (int i = 0; i < operationAnalysis.Parameters.Count; i++)
+    if (!operationInfo.Success)
     {
-        Console.WriteLine($"Parameter-{i + 1}:\n\tType: {operationAnalysis.Parameters[i].Type}\n\tValue: {operationAnalysis.Parameters[i].Value}");
+        var answer = operationInfo.ErrorInfo;
+        if (operationInfo.OperationDetected)
+        {
+            answer += $"\n{OperationExamples.Examples[operationInfo.OperationType]}";
+        }
+
+        Console.WriteLine(answer);
+        continue;
     }
 
-    Console.WriteLine($"Modifiers count: {operationAnalysis.Modifiers.Count}");
-    for (int i = 0; i < operationAnalysis.Modifiers.Count; i++)
+    var fileManagerInfo = FileManager.ExecuteOperation(operationInfo, ref currentDirectoryPath);
+
+    if (!fileManagerInfo.Succes)
     {
-        Console.WriteLine($"Modifier-{i + 1}:\n\tAssignment: {operationAnalysis.Modifiers[i].Assignment}");
+        Console.WriteLine(fileManagerInfo.Error);
     }
-
-    Console.WriteLine($"Succes: {operationAnalysis.Success}");
-    Console.WriteLine($"Error info: {operationAnalysis.ErrorInfo}");
-
-    #endregion
-
-    Console.ReadKey();
-    Console.Clear();
 }
-while(true) ;
+while(true);
+
+void Print(OperationInfo operationInfo)
+{
+    Console.WriteLine($"Operation detected: {operationInfo.OperationDetected}");
+    Console.WriteLine($"Operation type: {operationInfo.OperationType}");
+
+    Console.WriteLine($"Parameters count: {operationInfo.Parameters.Count}");
+    for (int i = 0; i < operationInfo.Parameters.Count; i++)
+    {
+        Console.WriteLine($"Parameter-{i + 1}:\n\tType: {operationInfo.Parameters[i].Type}\n\tValue: {operationInfo.Parameters[i].Value}");
+    }
+
+    Console.WriteLine($"Modifiers count: {operationInfo.Modifiers.Count}");
+    for (int i = 0; i < operationInfo.Modifiers.Count; i++)
+    {
+        Console.WriteLine($"Modifier-{i + 1}:\n\tAssignment: {operationInfo.Modifiers[i].Assignment}");
+    }
+
+    Console.WriteLine($"Succes: {operationInfo.Success}");
+    Console.WriteLine($"Error info: {operationInfo.ErrorInfo}");
+}
+void UpdateConsoleTitle(string title) => Console.Title = title;
