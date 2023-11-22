@@ -9,10 +9,8 @@ public sealed class RenameFileOrDirectoryTitleOperation : Operation
         parameters: new List<OperationParameter>
         {
             new OperationParameter(
-                type: OperationParameterTypes.FreeForm,
                 required: true),
             new OperationParameter(
-                type: OperationParameterTypes.FreeForm,
                 required: true)
         },
         modifiers: null!,

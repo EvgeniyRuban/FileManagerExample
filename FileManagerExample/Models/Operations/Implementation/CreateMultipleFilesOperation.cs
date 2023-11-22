@@ -9,19 +9,14 @@ public sealed class CreateMultipleFilesOperation : Operation
         parameters: new List<OperationParameter>
         {
             new OperationParameter(
-                type: OperationParameterTypes.FreeForm,
                 required: true),
             new OperationParameter(
-                type: OperationParameterTypes.FreeForm,
                 required: false),
             new OperationParameter(
-                type: OperationParameterTypes.FreeForm,
                 required: false),
             new OperationParameter(
-                type: OperationParameterTypes.FreeForm,
                 required: false),
             new OperationParameter(
-                type: OperationParameterTypes.FreeForm,
                 required: false),
         },
         modifiers: null!,

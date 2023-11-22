@@ -9,10 +9,8 @@ public sealed class CopyFileOrDirectoryOperation : Operation
         parameters: new List<OperationParameter>
         {
             new OperationParameter(
-                type: OperationParameterTypes.Path,
                 required: true),
             new OperationParameter(
-                type: OperationParameterTypes.Path,
                 required: false)
         },
         modifiers: new List<OperationModifier>

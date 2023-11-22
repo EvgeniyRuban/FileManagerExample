@@ -9,7 +9,6 @@ public sealed class RemoveFileOrDirectoryOperation : Operation
         parameters: new List<OperationParameter>
         {
             new OperationParameter(
-                type: OperationParameterTypes.FreeForm,
                 required: true),
         },
         modifiers: new List<OperationModifier>

@@ -9,7 +9,6 @@ public sealed class ShowFileContentOperation : Operation
         parameters: new List<OperationParameter>
         {
             new OperationParameter(
-                type: OperationParameterTypes.FreeForm,
                 required: true),
         },
         modifiers: null!,
