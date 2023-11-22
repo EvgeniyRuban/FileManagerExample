@@ -9,7 +9,6 @@ public sealed class ChangeCurrentDirectoryOperation : Operation
         parameters: new List<OperationParameter>
         {
             new OperationParameter(
-                type: OperationParameterTypes.Path,
                 required: true)
         },
         modifiers: null!,

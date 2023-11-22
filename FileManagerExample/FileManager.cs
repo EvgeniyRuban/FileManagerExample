@@ -49,7 +49,7 @@ public static class FileManager
 
     private static FileManagerInfo ChangeCurrentDirectory(OperationInfo operationInfo, ref string currentDirectory)
     {
-        var destDirectoryPath = operationInfo.Parameters[0].Value;
+        var destDirectoryPath = operationInfo.Args[0].Value;
 
         if (!Directory.Exists(destDirectoryPath))
         {
@@ -72,7 +72,7 @@ public static class FileManager
 
     private static FileManagerInfo MakeDirectory(OperationInfo operationInfo, string currentDirectory)
     {
-        var newDirectoryTitle = operationInfo.Parameters[0].Value;
+        var newDirectoryTitle = operationInfo.Args[0].Value;
         var newDirectoryPath = $"{currentDirectory}{Path.DirectorySeparatorChar}{newDirectoryTitle}";
         Directory.CreateDirectory(newDirectoryPath);
 
@@ -81,7 +81,7 @@ public static class FileManager
 
     private static FileManagerInfo RemoveFileOrDirectory(OperationInfo operationInfo, string currentDirectory)
     {
-        var componentPath = $"{currentDirectory}{Path.DirectorySeparatorChar}{operationInfo.Parameters[0].Value}";
+        var componentPath = $"{currentDirectory}{Path.DirectorySeparatorChar}{operationInfo.Args[0].Value}";
 
         if (Directory.Exists(componentPath))
         {
@@ -119,7 +119,7 @@ public static class FileManager
 
     private static FileManagerInfo RenameFileOrDirectoryTitle(OperationInfo operationInfo, string currentDirectory)
     {
-        var sourceComponent = ConvertToFileSystemInfo(operationInfo.Parameters[0].Value, currentDirectory);
+        var sourceComponent = ConvertToFileSystemInfo(operationInfo.Args[0].Value, currentDirectory);
 
         if (sourceComponent == null)
         {
@@ -131,7 +131,7 @@ public static class FileManager
         }
 
         var sourceComponentParentPath = Directory.GetParent(sourceComponent.FullName).FullName;
-        var newComponentPath = Path.Combine(sourceComponentParentPath, operationInfo.Parameters[1].Value);
+        var newComponentPath = Path.Combine(sourceComponentParentPath, operationInfo.Args[1].Value);
 
         if (sourceComponent is FileInfo)
         {
@@ -169,7 +169,7 @@ public static class FileManager
 
     private static FileManagerInfo CreateMultipleFiles(OperationInfo operationInfo, string currentDirectory)
     {
-        foreach(var parameter in operationInfo.Parameters)
+        foreach(var parameter in operationInfo.Args)
         {
             var currentFilePath = Path.Combine(currentDirectory, parameter.Value);
             var file = new FileInfo(currentFilePath);
@@ -191,7 +191,7 @@ public static class FileManager
 
     private static FileManagerInfo ShowFileContent(OperationInfo operationInfo, string currentDirectory)
     {
-        var componentToPrint = ConvertToFileSystemInfo(operationInfo.Parameters[0].Value, currentDirectory);
+        var componentToPrint = ConvertToFileSystemInfo(operationInfo.Args[0].Value, currentDirectory);
         if (componentToPrint == null)
         {
             return new FileManagerInfo
@@ -216,16 +216,16 @@ public static class FileManager
 
     private static FileManagerInfo AppendTextToFile(OperationInfo operationInfo, string currentDirectory)
     {
-        var filePath = $"{currentDirectory}{Path.DirectorySeparatorChar}{operationInfo.Parameters[0].Value}";
-        File.AppendAllText(filePath, operationInfo.Parameters[1].Value);
+        var filePath = $"{currentDirectory}{Path.DirectorySeparatorChar}{operationInfo.Args[0].Value}";
+        File.AppendAllText(filePath, operationInfo.Args[1].Value);
         return new FileManagerInfo(true);
     }
 
     private static FileManagerInfo CopyFileOrDirectory(OperationInfo operationInfo, string currentDirectory)
     {
-        var sourceComponent = ConvertToFileSystemInfo(operationInfo.Parameters[0].Value, currentDirectory);
-        var destComponentPath = operationInfo.Parameters.Count() == 2 
-            ? operationInfo.Parameters[1].Value 
+        var sourceComponent = ConvertToFileSystemInfo(operationInfo.Args[0].Value, currentDirectory);
+        var destComponentPath = operationInfo.Args.Count() == 2 
+            ? operationInfo.Args[1].Value 
             : currentDirectory;
         var destComponent = ConvertToFileSystemInfo(destComponentPath, currentDirectory);
 

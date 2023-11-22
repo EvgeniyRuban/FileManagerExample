@@ -18,11 +18,19 @@ public static class OperationAnalizer
         new CopyFileOrDirectoryOperation(),
         new ClearConsoleOperation(),
     };
+    private static List<OperationConstArg> _constArgs = new List<OperationConstArg>()
+    {
+        new CurrentDirectoryArg(),
+        new ParentDirectoryArg(),
+        new ParentOfParentDirectoryArg(),
+    };
 
     public static OperationInfo GetOperationAnalysis(string operationText, string currentDirectoryPath)
     {
         var operationAnalysisInfo = new OperationInfo();
         var array = operationText.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+        ReplaceConstantArgs(ref array, currentDirectoryPath);
 
         JoinParameters(ref array);
 
@@ -57,10 +65,10 @@ public static class OperationAnalizer
             {
                 case OperationComponents.Parameter:
                     {
-                        var parameterInfo = component as OperationParameterInfo;
-                        var temp = parameterInfo.Value.TrimStart(OperationMaskDefinitions.StartParameterMarker);
-                        parameterInfo.Value = temp.TrimEnd(OperationMaskDefinitions.EndParameterMarker);
-                        operationAnalysisInfo.Parameters.Add(parameterInfo);
+                        var argumentInfo = component as OperationArgInfo;
+                        var temp = argumentInfo.Value.TrimStart(OperationMaskDefinitions.StartArgumentMarker);
+                        argumentInfo.Value = temp.TrimEnd(OperationMaskDefinitions.EndArgumentMarker);
+                        operationAnalysisInfo.Args.Add(argumentInfo);
                         break;
                     }
                 case OperationComponents.Modifier: operationAnalysisInfo.Modifiers.Add((OperationModifierInfo)component); break;
@@ -85,7 +93,7 @@ public static class OperationAnalizer
             }
             else if (IsParameter(array[i]))
             {
-                interpretedComponents[i] = new OperationParameterInfo();
+                interpretedComponents[i] = new OperationArgInfo();
             }
             else
             {
@@ -130,9 +138,8 @@ public static class OperationAnalizer
                 if (mask[i].ComponentType == OperationComponents.Parameter)
                 {
                     var parameter = mask[i] as OperationParameter;
-                    interpretedComponents[j] = new OperationParameterInfo(required: parameter.Required)
+                    interpretedComponents[j] = new OperationArgInfo(required: parameter.Required)
                     {
-                        Type = parameter.Type,
                         Value = array[j]
                     };
                 }
@@ -179,7 +186,7 @@ public static class OperationAnalizer
     private static bool IsCommand(string text, OperationCommand command) => command.Declarations.Contains(text);
 
     private static bool IsParameter(string text)
-        => text[0] == OperationMaskDefinitions.StartParameterMarker && text[text.Length - 1] == OperationMaskDefinitions.EndParameterMarker;
+        => text[0] == OperationMaskDefinitions.StartArgumentMarker && text[text.Length - 1] == OperationMaskDefinitions.EndArgumentMarker;
 
     private static bool IsModifier(string text, OperationModifier modifier) => modifier.Declaration == text;
 
@@ -191,7 +198,7 @@ public static class OperationAnalizer
         for (int i = 0; i < array.Length; i++)
         {
             char firstCharacter = array[i][0];
-            if (firstCharacter == OperationMaskDefinitions.StartParameterMarker)
+            if (firstCharacter == OperationMaskDefinitions.StartArgumentMarker)
             {
                 int parameterElementCount = 1;
 
@@ -201,12 +208,12 @@ public static class OperationAnalizer
 
                     if (i == j)
                     {
-                        if(lastCharacter == OperationMaskDefinitions.EndParameterMarker && array[j].Length != 1)
+                        if(lastCharacter == OperationMaskDefinitions.EndArgumentMarker && array[j].Length != 1)
                         {
                             break;
                         }
                     }
-                    else if (lastCharacter == OperationMaskDefinitions.EndParameterMarker)
+                    else if (lastCharacter == OperationMaskDefinitions.EndArgumentMarker)
                     {
                         break;
                     }
@@ -294,5 +301,43 @@ public static class OperationAnalizer
         }
 
         array = newArray;
+    }
+
+    private static void ReplaceConstantArgs(ref string[] array, string currentDirectoryPath)
+    {
+        for (int i = 0; i < array.Length; i++)
+        {
+            var currentString = array[i];
+            var arg = _constArgs.FirstOrDefault(a => a.Declaration == currentString);
+
+            if (arg != null)
+            {
+                var currentDirectoryInfo = new DirectoryInfo(currentDirectoryPath);
+                switch (arg.Type)
+                {
+                    case OperationConstantArgTypes.CurrentDirectory:
+                        {
+                            array[i] = $"{OperationMaskDefinitions.StartArgumentMarker}" +
+                                $"{currentDirectoryInfo.FullName}" +
+                                $"{OperationMaskDefinitions.StartArgumentMarker}";
+                            break;
+                        }
+                    case OperationConstantArgTypes.ParentDirectory:
+                        {
+                            array[i] = $"{OperationMaskDefinitions.StartArgumentMarker}" +
+                                $"{currentDirectoryInfo.Parent?.FullName ?? currentDirectoryInfo.FullName}" +
+                                $"{OperationMaskDefinitions.StartArgumentMarker}";
+                            break;
+                        }
+                    case OperationConstantArgTypes.ParantOfParentDirectory:
+                        {
+                            array[i] = $"{OperationMaskDefinitions.StartArgumentMarker}" +
+                                $"{currentDirectoryInfo.Parent?.Parent?.FullName ?? currentDirectoryInfo.FullName}" +
+                                $"{OperationMaskDefinitions.StartArgumentMarker}";
+                            break;
+                        }
+                }
+            }
+        }
     }
 }
