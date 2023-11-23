@@ -8,9 +8,9 @@ public class FileManagerInfo
     public FileManagerInfo(bool succes, string error = null!)
     {
         Succes = succes;
-        Error = error;
+        ErrorInfo = error;
     }
 
     public bool Succes { get; set; }
-    public string? Error { get; set; }
+    public string? ErrorInfo { get; set; }
 }

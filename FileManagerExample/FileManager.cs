@@ -26,6 +26,7 @@ public static class FileManager
     private static FileManagerInfo ListDirectoryContent(string currentDirectory)
     {
         var directoryComponents = Directory.EnumerateFileSystemEntries(currentDirectory);
+        var fileSystemComponents = new List<FileSystemInfo>(directoryComponents.Count());
 
         foreach (string component in directoryComponents)
         {
@@ -34,15 +35,15 @@ public static class FileManager
 
             if (isFile)
             {
-                text = Path.GetFileName(component);
+                fileSystemComponents.Add(new FileInfo(component));
             }
             else
-            { var directory = new DirectoryInfo(component);
-                text = $"{directory.Name}{Path.DirectorySeparatorChar}";
+            {
+                fileSystemComponents.Add(new DirectoryInfo(component));
             }
-
-            Console.WriteLine(text);
         }
+
+        ConsoleOutputTool.PrintDirectoryContent(fileSystemComponents);
 
         return new FileManagerInfo(true);
     }
@@ -60,7 +61,7 @@ public static class FileManager
                 return new FileManagerInfo
                 {
                     Succes = false,
-                    Error = FileManagerErrorDescriptions.PathIsUndefined
+                    ErrorInfo = FileManagerErrorDescriptions.PathIsUndefined
                 };
             }
         }
@@ -97,7 +98,7 @@ public static class FileManager
                     return new FileManagerInfo
                     {
                         Succes = false,
-                        Error = FileManagerErrorDescriptions.NotEmptyDirectoryRemove
+                        ErrorInfo = FileManagerErrorDescriptions.NotEmptyDirectoryRemove
                     };
                 }
             }
@@ -113,7 +114,7 @@ public static class FileManager
         return new FileManagerInfo
         {
             Succes = false,
-            Error = FileManagerErrorDescriptions.PathIsUndefined
+            ErrorInfo = FileManagerErrorDescriptions.PathIsUndefined
         };
     }
 
@@ -126,7 +127,7 @@ public static class FileManager
             return new FileManagerInfo
             {
                 Succes = false,
-                Error = FileManagerErrorDescriptions.PathIsUndefined
+                ErrorInfo = FileManagerErrorDescriptions.PathIsUndefined
             };
         }
 
@@ -140,7 +141,7 @@ public static class FileManager
                 return new FileManagerInfo
                 {
                     Succes = false,
-                    Error = FileManagerErrorDescriptions.ComponentWithCurrentNameExists
+                    ErrorInfo = FileManagerErrorDescriptions.ComponentWithCurrentNameExists
                 };
             }
 
@@ -155,7 +156,7 @@ public static class FileManager
                 return new FileManagerInfo
                 {
                     Succes = false,
-                    Error = FileManagerErrorDescriptions.ComponentWithCurrentNameExists
+                    ErrorInfo = FileManagerErrorDescriptions.ComponentWithCurrentNameExists
                 };
             }
 
@@ -179,7 +180,7 @@ public static class FileManager
                 return new FileManagerInfo
                 {
                     Succes = false,
-                    Error = FileManagerErrorDescriptions.CreateFileOperationToCreateDirectory
+                    ErrorInfo = FileManagerErrorDescriptions.CreateFileOperationToCreateDirectory
                 };
             }
 
@@ -197,7 +198,7 @@ public static class FileManager
             return new FileManagerInfo
             {
                 Succes = false,
-                Error = FileManagerErrorDescriptions.PathIsUndefined
+                ErrorInfo = FileManagerErrorDescriptions.PathIsUndefined
             };
         }
 
@@ -206,7 +207,7 @@ public static class FileManager
             return new FileManagerInfo
             {
                 Succes = false,
-                Error = FileManagerErrorDescriptions.UsingDirectoryInOperationWithFile
+                ErrorInfo = FileManagerErrorDescriptions.UsingDirectoryInOperationWithFile
             };
         }
         string text = File.ReadAllText(componentToPrint.FullName);
@@ -217,7 +218,21 @@ public static class FileManager
     private static FileManagerInfo AppendTextToFile(OperationInfo operationInfo, string currentDirectory)
     {
         var filePath = $"{currentDirectory}{Path.DirectorySeparatorChar}{operationInfo.Args[0].Value}";
-        File.AppendAllText(filePath, operationInfo.Args[1].Value);
+        bool appendInNewLine = operationInfo.Modifiers.Any(m => m.Assignment == OperationModifierAssignments.NewLine);
+        
+        if (appendInNewLine)
+        {
+            using (var stream = File.AppendText(filePath))
+            {
+                stream.Write(stream.NewLine);
+                stream.Write(operationInfo.Args[1].Value);
+            }
+        }
+        else
+        {
+            File.AppendAllText(filePath, operationInfo.Args[1].Value);
+        }
+        
         return new FileManagerInfo(true);
     }
 
@@ -234,7 +249,7 @@ public static class FileManager
             return new FileManagerInfo
             {
                 Succes = false,
-                Error = FileManagerErrorDescriptions.PathIsUndefined
+                ErrorInfo = FileManagerErrorDescriptions.PathIsUndefined
             };
         }
 
@@ -243,7 +258,7 @@ public static class FileManager
             return new FileManagerInfo
             {
                 Succes = false,
-                Error = FileManagerErrorDescriptions.SourceAndDestComponentSame
+                ErrorInfo = FileManagerErrorDescriptions.SourceAndDestComponentSame
             };
         }
 
@@ -257,7 +272,7 @@ public static class FileManager
                 return new FileManagerInfo
                 {
                     Succes = false,
-                    Error = FileManagerErrorDescriptions.DestinationFileExists
+                    ErrorInfo = FileManagerErrorDescriptions.DestinationFileExists
                 };
             }
 
@@ -281,7 +296,7 @@ public static class FileManager
             return new FileManagerInfo
             {
                 Succes = false,
-                Error = FileManagerErrorDescriptions.FileCannotIncludeDirectory
+                ErrorInfo = FileManagerErrorDescriptions.FileCannotIncludeDirectory
             };
         }
         else if (sourceComponent is DirectoryInfo && destComponent is DirectoryInfo)

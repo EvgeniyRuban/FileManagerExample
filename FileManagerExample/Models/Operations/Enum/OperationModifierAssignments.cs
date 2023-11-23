@@ -3,5 +3,6 @@
 public enum OperationModifierAssignments
 {
     Recursive,
-    Overwrite
+    Overwrite,
+    NewLine
 }
