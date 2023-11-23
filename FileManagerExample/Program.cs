@@ -26,7 +26,7 @@ do
         ConsoleOutputTool.PrintErrorInfo(operationInfo.ErrorInfo);
         if (operationInfo.OperationDetected)
         {
-            ConsoleOutputTool.PrintOperationAdvice(operationInfo);
+            ConsoleOutputTool.PrintOperationExample(operationInfo);
         }
 
         continue;

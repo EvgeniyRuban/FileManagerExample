@@ -27,9 +27,13 @@ public static class ConsoleOutputTool
     }
     public static void PrintOperationLineStart() => Print(_operationLineStart, foreground: ConsoleColor.Yellow);
     public static void PrintErrorInfo(string errorInfo) => PrintLine(errorInfo, foreground: ConsoleColor.Red);
-    public static void PrintOperationAdvice(OperationInfo operationInfo)
+    public static void PrintOperationExample(OperationInfo operationInfo) => PrintLine(OperationExamples.Examples[operationInfo.OperationType]);
+    public static void PrintAllOperationExamples()
     {
-        PrintLine(OperationExamples.Examples[operationInfo.OperationType]);
+        foreach(var key in OperationExamples.Examples.Keys)
+        {
+            PrintLine(OperationExamples.Examples[key]);
+        }
     }
     public static void PrintDirectoryContent(List<FileSystemInfo> fileSystemInfo)
     {

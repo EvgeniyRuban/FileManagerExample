@@ -17,6 +17,7 @@ public static class OperationAnalizer
         new AppendTextToFileOperation(),
         new CopyFileOrDirectoryOperation(),
         new ClearConsoleOperation(),
+        new HelpOperation(),
     };
     private static List<OperationConstArg> _constArgs = new List<OperationConstArg>()
     {

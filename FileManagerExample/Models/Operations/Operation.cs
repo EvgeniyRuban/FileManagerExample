@@ -13,7 +13,7 @@ public abstract class Operation
         Command = command;
         Parameters = parameters ?? new List<OperationParameter>(); ; 
         Modifiers = modifiers ?? new List<OperationModifier>();
-        MaskComponents = OperationMaskTool.ConvertToMaskComponentList(mask, command, parameters, modifiers);
+        MaskComponents = OperationTool.ConvertToMaskComponentList(mask, command, parameters, modifiers);
     }
 
     public OperationTypes Type { get; set; }

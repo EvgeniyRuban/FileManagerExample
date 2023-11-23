@@ -19,6 +19,7 @@ public static class FileManager
             case OperationTypes.AppendTextToFile: return AppendTextToFile(operationInfo, currentDirectory);
             case OperationTypes.CopyFileOrDirectory: return CopyFileOrDirectory(operationInfo, currentDirectory);
             case OperationTypes.ClearConsole: return ClearConsole();
+            case OperationTypes.Help: return PrintHelp();
             default: return new FileManagerInfo(true);
         }
     }
@@ -367,5 +368,11 @@ public static class FileManager
                 CopyDirectory(subDirectory.FullName, newDestinationDir, true);
             }
         }
+    }
+
+    private static FileManagerInfo PrintHelp()
+    {
+        ConsoleOutputTool.PrintAllOperationExamples();
+        return new FileManagerInfo(true);
     }
 }
