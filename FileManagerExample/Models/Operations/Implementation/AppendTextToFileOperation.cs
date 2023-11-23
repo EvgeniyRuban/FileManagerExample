@@ -13,8 +13,14 @@ public sealed class AppendTextToFileOperation : Operation
             new OperationParameter(
                 required: true),
         },
-        modifiers: null!,
-        mask: "c p p")
+        modifiers: new List<OperationModifier>
+        {
+            new OperationModifier(
+                assignment: OperationModifierAssignments.NewLine,
+                required: false,
+                declaration: "-l")
+        },
+        mask: "c m p p")
     {
     }
 }

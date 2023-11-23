@@ -12,5 +12,6 @@ public enum OperationTypes
     AppendTextToFile,
     CopyFileOrDirectory,
     ClearConsole,
+    Help,
     None
 }

@@ -1,10 +1,8 @@
 ﻿using FileManagerExample;
 using FileManagerExample.Models.Configurations;
-using FileManagerExample.Models.Operations;
 
 #region Initialization
 
-string userName = Environment.UserName;
 var currentDirectoryPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
 var config = Configuration.GetConfiguration();
 var startupSettings = await config.GetAsync<StartupSettings>();
@@ -18,20 +16,19 @@ if (startupSettings.UseDirectoryFromLastSession)
 
 do
 {
-    UpdateConsoleTitle(currentDirectoryPath);
-    Console.Write($"{userName}: ");
+    Console.Title = currentDirectoryPath;
+    ConsoleOutputTool.PrintOperationLineStart();
     var input = Console.ReadLine();
     var operationInfo = OperationAnalizer.GetOperationAnalysis(input, currentDirectoryPath);
 
     if (!operationInfo.Success)
     {
-        var answer = operationInfo.ErrorInfo;
+        ConsoleOutputTool.PrintErrorInfo(operationInfo.ErrorInfo);
         if (operationInfo.OperationDetected)
         {
-            answer += $"\n{OperationExamples.Examples[operationInfo.OperationType]}";
+            ConsoleOutputTool.PrintOperationExample(operationInfo);
         }
 
-        Console.WriteLine(answer);
         continue;
     }
 
@@ -39,9 +36,7 @@ do
 
     if (!fileManagerInfo.Succes)
     {
-        Console.WriteLine(fileManagerInfo.Error);
+        ConsoleOutputTool.PrintErrorInfo(fileManagerInfo.ErrorInfo);
     }
 }
 while(true);
-
-void UpdateConsoleTitle(string title) => Console.Title = title;

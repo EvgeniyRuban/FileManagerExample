@@ -2,7 +2,7 @@
 
 namespace FileManagerExample;
 
-public static class OperationMaskTool
+public static class OperationTool
 {
     public static IList<IOperationMaskComponent> ConvertToMaskComponentList(string mask,
                                                                             OperationCommand command,

@@ -2,7 +2,7 @@
 {
     public struct FileManagerErrorDescriptions
     {
-        public const string PathIsUndefined = "The received parameter cannot be identified as a path.";
+        public const string PathIsUndefined = "The received argument cannot be identified as a path.";
         public const string NotEmptyDirectoryRemove = "Cannot remove not empty directory.";
         public const string DestinationFileExists = "Destination file is already exists.";
         public const string SourceAndDestComponentSame = "Source and destination components cannot navigate to the same directory component.";
